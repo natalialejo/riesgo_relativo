@@ -1,12 +1,12 @@
 ## Indice:
 1. [Objetivo](#Objetivo)
 2. [Contexto](#Contexto)
-3. [Metodología](#Metodología)
-    3.1.[Procesamiento y preparación de datos](#Procesamiento-y-preparación-de-datos)
-    3.2.[Análisis exploratorio](#Análisis-exploratorio)
-    3.3.[Análisis técnico](#Análisis-técnico)
-    3.4.[Creación de Dashboard en Looker Studio](#Creación-de-Dashboard-en-Looker-Studio)
-4. [Conclusiones y Recomendaciones](#Conclusiones-y-Recomendaciones)
+3. [Metodología](#Metodología)   
+    3.1.[Procesamiento y preparación de datos](#Procesamiento-y-preparación-de-datos)   
+    3.2.[Análisis exploratorio](#Análisis-exploratorio)   
+    3.3.[Análisis técnico](#Análisis-técnico)    
+    3.4.[Creación de Dashboard en Looker Studio](#Creación-de-Dashboard-en-Looker-Studio)    
+4. [Conclusiones y Recomendaciones](#Conclusiones-y-Recomendaciones)    
 
    
 ## Objetivo:
