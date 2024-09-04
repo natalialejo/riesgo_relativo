@@ -14,7 +14,7 @@
 ## Contexto: 
 El banco "Super Caja" ha experimentado un notable aumento en la demanda de crédito, impulsado por clientes que buscan financiar compras importantes o consolidar deudas existentes. Este crecimiento representa una oportunidad significativa para expandir la cartera crediticia del banco, pero también conlleva un aumento en los riesgos crediticios.
 
-Para gestionar estos riesgos de manera efectiva, el banco cuenta con una base de datos de más de 35,000 clientes, que incluye información detallada sobre diversas variables clave, como la edad, el salario, los tipos y cantidades de préstamos. Además, la base de datos contiene una clasificación preexistente denominada "default flag", que indica si un cliente es un buen pagador o si presenta riesgos de incumplimiento.
+Para gestionar estos riesgos de manera efectiva, el banco cuenta con una base de datos de 36,000 clientes, que incluye información detallada sobre diversas variables clave, como la edad, el salario, los tipos y cantidades de préstamos. Además, la base de datos contiene una clasificación preexistente denominada "default flag", que indica si un cliente es un buen pagador o si presenta riesgos de incumplimiento.
 
 Esta información es crucial para realizar un análisis riguroso del riesgo relativo, lo que permitirá al banco segmentar a sus clientes de manera más precisa y tomar decisiones informadas sobre la concesión de crédito, minimizando así la exposición a pérdidas financieras.
 
@@ -71,45 +71,41 @@ Este conjunto de tablas contiene informción sobre préstamos concedidos a un gr
 
 #### 4. Limpieza y transformación de datos:
 
-* Conexión e Importación de Datos:
+- Conexión e Importación de Datos:  
+    * Creación de proyecto *riesgorelativop3* y se conectaron las 4 tablas en Google BigQuery.
 
-    Se conectaron y crearon 4 tablas en Google BigQuery utilizando archivos de datos proporcionados.
-    Tablas creadas: user_info, loans_outstanding, loans_detail, y default.
+- Identificación de valores nulos, duplicados, fuera de rango o con caracteres extraños: 
+    * Identificados y tratados 7,199 valores nulos en  variable *last_month_salary* y 943 en *number_dependents* en la tabla user_info.  
+    * Datos duplicados no afectan significativamente el análisis.
+    * Se identificaron valores inconsistentes en la variable categórica *loan_type*(mayúsculas y minúsculas mezcladas) de la tabla loans_outstanding.Se corrigieron estos valores utilizando comandos `UPPER`, `LOWER` para estandarizar las categorías (real estate y other).
+    * Se cambiaron los formatos de *user_id* de `INTEGER` a `STRING` para evitar problemas en el proceso de unión de tablas.
+    * Se utilizó la función CORR para evaluar la correlación entre variables como:
+        1. En *more_90_days_overdue* y *number_times_delayed_payment_loan_30_59_days*,se identificó una correlación alta (r = 0.9829), por lo que se comparó la desviación estándar de cada una y se eligió tomar en cuenta para el análisis la variable con mayor desviación estándar (*more_90_days_overdue*) para representar mejor la información.
+        2. Variables Independientes: Se comprobó que *debt_ratio* y *more_90_days_overdue* tenían una baja correlación, por lo que ambas se mantuvieron en el análisis, ya que proporcionaban información única.
+        3. Decisión sobre variables: Solo se excluyó la variable *gender*, esto debido a que no es un factor determinante del riesgo crediticio, y su uso puede generar sesgos discriminatorios.
+    * Identificación y Tratamiento de Outliers: se utilizaron gráficos como histogramas y diagramas de caja (boxplots) en Looker Studio para identificar outliers en variables clave como *last_month_salary* y *age*.
+    * Seguido, se aplicó la técnica estadisticas de winsorización utilizando los percentiles P2 y P99 para reducir el impacto de los outliers sin eliminarlos.Se imputaron los valores extremos con los valores en estos percentiles, manteniendo así la representatividad de los datos cercanos a los extremos.    
+        Pasos realizados:    
+        1. Calcular percentiles P2 y P99 para *last_month_salary*.   
+        2. Limitar el rango de edad a un máximo de 85 años para categorizar mejor a los clientes mayores, se crea la varriable *age_limited*.  
+        3. Imputar valores nulos en *last_month_salary* y *number_dependents* usando la mediana.
+    * En la variable *using_lines_not_secured_personal_assets* de la tabla *loans_detail*, se identificaron valores en notación científica (ej. 7.25e-05). Estos valores son correctos y no se alteraron, ya que representan el uso bajo de líneas de crédito.
 
-* Limpieza y Preparación de Datos:
+- Creación de Nuevas Variables:  
+    * Se generaron nuevas variables para agrupar los préstamos por cliente (user_id), incluyendo *total_loans*, *real_state_loans*, y *other_loans*.
 
-    Valores nulos:
-        Identificación y tratamiento de 7,199 valores nulos en last_month_salary y 943 en number_dependents en la tabla user_info.
-        Se utilizó la mediana para imputar valores nulos y se aplicó la técnica de winsorización para manejar outliers.
-    Datos duplicados:
-        Identificados y revisados, no afectaron significativamente el análisis.
-    Datos inconsistentes en variables categóricas:
-        Estandarización de categorías en loan_type utilizando SQL (UPPER, LOWER).
+- Evaluación de Colinealidad en Nuevas Variables:    
+    * *total_loans* incluye *other_loans* como parte significativa, lo que generó alta correlación entre ambas variables, por lo que se optó por trabajar solo con *total_loans* para evitar redundancias y mejorar la eficiencia del modelo.
 
-* Análisis de Correlación:
+- Unión de Tablas:
+    * Se unieron las tres tablas limpias (*user_default_view*, *loutstanding_view*, *ldetail_view*) mediante un`INNER JOIN`, dicha union resultó en la exclusión de aproximadamente 425 registros que presentaban valores inconsistentes.
+    * El proceso de unión resultó en una tabla consolidada con un total de 35,574 registros.    
 
-    Evaluación de la correlación entre variables utilizando la función CORR en SQL para identificar multicolinealidad.
-    Determinación de alta correlación entre variables como more_90_days_overdue y number_times_delayed_payment_loan_30_59_days (r = 0.9829).
-    Decisión de excluir variables con alta correlación para evitar multicolinealidad y simplificar el modelo.
+#### 5. Análisis Exploratorio:   
 
-* Tratamiento de Outliers:
 
-    Identificación y tratamiento de outliers en variables clave como last_month_salary, age, y number_dependents utilizando percentiles (P2 y P99).
-    Aplicación de winsorización para reemplazar outliers con valores límite.
 
-* Creación de Nuevas Variables:
 
-    Construcción de nuevas variables como total_loans, real_state_loans, y other_loans para mejorar el análisis.
-    Evaluación de la correlación entre las nuevas variables y el resto de los datos.
-
-* Integración de Datos:
-
-    Unión de tablas limpias (user_default_view, loutstanding_view, ldetail_view) mediante comandos SQL LEFT JOIN e INNER JOIN para consolidar la base de datos.
-    Construcción de una tabla final con 35,574 registros, lista para el análisis de riesgo relativo.
-
-* Construcción de Tablas Auxiliares:
-
-    Creación de tablas auxiliares utilizando subconsultas y comandos WITH para analizar valores nulos y comprender mejor los datos.
 
 
 
