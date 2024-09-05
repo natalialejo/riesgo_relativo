@@ -80,15 +80,50 @@ Este conjunto de tablas contiene informción sobre préstamos concedidos a un gr
     * Se identificaron valores inconsistentes en la variable categórica *loan_type*(mayúsculas y minúsculas mezcladas) de la tabla loans_outstanding.Se corrigieron estos valores utilizando `LOWER` y `CASE` para estandarizar las categorías (real estate y other).
     * Se cambiaron los formatos de *user_id* de `INTEGER` a `STRING` para evitar problemas en el proceso de unión de tablas.
     * Se utilizó la función `CORR` para evaluar la correlación entre variables como:
-        1. En *more_90_days_overdue* y *number_times_delayed_payment_loan_30_59_days*,se identificó una correlación alta (r = 0.9829), por lo que se comparó la desviación estándar de cada una y se eligió tomar en cuenta para el análisis la variable con mayor desviación estándar (*more_90_days_overdue*) para representar mejor la información.
+        1. En *more_90_days_overdue* y *number_times_delayed_payment_loan_30_59_days*,*number_times_delayed_payment_loan_60_89_days* y se identificó una correlación alta entre ellas, por lo que se comparó la desviación estándar de cada una. Al ver poca diferencia se dejan las tres variables para el análisis.
         2. Variables Independientes: Se comprobó que *debt_ratio* y *more_90_days_overdue* tenían una baja correlación, por lo que ambas se mantuvieron en el análisis, ya que proporcionaban información única.
         3. Decisión sobre variables: Solo se excluyó la variable *gender*, esto debido a que no es un factor determinante del riesgo crediticio, y su uso puede generar sesgos discriminatorios.
+
+``` sql
+SELECT  
+ CORR(more_90_days_overdue,number_times_delayed_payment_loan_30_59_days) AS prueba_correlacion
+FROM `riesgorelativop3.projectRR3.loans_detail` 
+-- 0.98291680661459857, alta correlacion
+
+SELECT 
+ CORR(more_90_days_overdue,number_times_delayed_payment_loan_60_89_days)
+FROM `riesgorelativop3.projectRR3.loans_detail` 
+-- 0.99213 alta correlación.
+
+-- sacar la desviación estandar de cada variable para decidir: una desviación mayor = más representativa, por lo que se excluirá la variable con menor desviación.
+
+SELECT
+ STDDEV_SAMP(more_90_days_overdue)
+FROM `riesgorelativop3.projectRR3.loans_detail` 
+-- STDDEV_SAMP = 4.12136
+
+SELECT
+ STDDEV_SAMP(number_times_delayed_payment_loan_30_59_days)
+FROM `riesgorelativop3.projectRR3.loans_detail` 
+-- 4.14402
+
+SELECT
+ STDDEV_SAMP(number_times_delayed_payment_loan_60_89_days)
+FROM `riesgorelativop3.projectRR3.loans_detail` 
+-- 4.10551
+
+-- La diferencia de la desviación estándar entre las variables es muy pequeña (0.03851) la dispersión de los datos alrededor de la media es muy similar para ambas variables.
+```
+* 
     * Identificación y Tratamiento de Outliers: se utilizaron gráficos como histogramas y diagramas de caja (boxplots) en Looker Studio para identificar outliers en variables clave como *last_month_salary* y *age*.
     * Seguido, se aplicó la técnica estadisticas de winsorización utilizando los percentiles P2 y P99 para reducir el impacto de los outliers sin eliminarlos.Se imputaron los valores extremos con los valores en estos percentiles, manteniendo así la representatividad de los datos cercanos a los extremos.    
         Pasos realizados:    
         1. Calcular percentiles P2 y P99 para *last_month_salary*.   
         2. Limitar el rango de edad a un máximo de 85 años para categorizar mejor a los clientes mayores, se crea la varriable *age_limited*.  
         3. Imputar valores nulos en *last_month_salary* y *number_dependents* usando la mediana.
+    * En la variable *using_lines_not_secured_personal_assets* de la tabla *loans_detail*, se identificaron valores en notación científica (ej. 7.25e-05). Estos valores son correctos y no se alteraron, ya que representan el uso bajo de líneas de crédito.
+
+##### Query de winzorización
 
 ``` slq
 WITH percentiles AS (
@@ -126,9 +161,7 @@ FROM
   winsorized_data;
 
 ```
-       
-    * En la variable *using_lines_not_secured_personal_assets* de la tabla *loans_detail*, se identificaron valores en notación científica (ej. 7.25e-05). Estos valores son correctos y no se alteraron, ya que representan el uso bajo de líneas de crédito.
-
+    
 - Creación de Nuevas Variables:  
     * Se generaron nuevas variables para agrupar los préstamos por cliente (user_id), incluyendo *total_loans*, *real_state_loans*, y *other_loans*.
 
@@ -140,6 +173,8 @@ FROM
     * El proceso de unión resultó en una tabla consolidada con un total de 35,574 registros.    
 
 #### 5. Análisis Exploratorio:   
+
+
 
 
 
