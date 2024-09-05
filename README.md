@@ -6,7 +6,7 @@
     3.2. [Análisis exploratorio](#Análisis-exploratorio)   
     3.3. [Análisis Riesgo Relativo](#Análisis-Riesgo-Relativo)    
     3.4. [Creación de Dashboard en Looker Studio](#Creación-de-Dashboard-en-Looker-Studio)    
-4. [Conclusiones y Recomendaciones](#Conclusiones-y-Recomendaciones)    
+4. [Resultados y Recomendaciones](#Resultados-y-Recomendaciones)    
    
 ## 1. Objetivo:
  Identificar y segmentar a los clientes en función de su riesgo relativo, a través de la evaluación detallada de variables clave en la base de datos proporcionada por el banco. Este análisis inicial establecerá una base sólida para futuros desarrollos, como la creación de un score crediticio y la automatización del proceso de evaluación de riesgo, contribuyendo a la solidez financiera y operativa del banco.
@@ -324,7 +324,7 @@ El uso de KPIs en el dashboard fue fundamental para medir el rendimiento y evalu
 
 ![Texto alternativo](images/dashboard.png?raw=true)
 
-## 4. Conclusiones y recomendaciones
+## 4. Resultados y recomendaciones
 
 - Resultados claves:
 
@@ -338,17 +338,21 @@ El uso de KPIs en el dashboard fue fundamental para medir el rendimiento y evalu
 
 - Recomendaciones:
 
-    * Políticas de crédito personalizadas por edad y salario: se sugiere Imanalizar la implementación de políticas más cautelosas para clientes jóvenes y con salarios bajos, quienes presentan un mayor riesgo de impago. Paralelamente, ofrecer condiciones crediticias más favorables a los clientes mayores de 63 años y aquellos con altos ingresos, que son menos riesgosos.
+    * Políticas de crédito personalizadas por edad y salario: se sugiere analizar la implementación de políticas más cautelosas para clientes jóvenes y con salarios bajos, quienes presentan un mayor riesgo de impago. Paralelamente, ofrecer condiciones crediticias más favorables a los clientes mayores de 63 años y aquellos con altos ingresos, que son menos riesgosos.
 
-    * Gestión del riesgo Basada en la mora prolongada: Los clientes con mora prolongada (>90 días) deben ser tratados con políticas más estrictas, como la reestructuración de deudas y medidas preventivas para evitar futuros incumplimientos.
+    * Gestión del riesgo basada en la mora prolongada: Los clientes con mora prolongada (>90 días) deben ser tratados con políticas más estrictas, como la reestructuración de deudas y medidas preventivas para evitar futuros incumplimientos.
 
-    * Optimización y Automatización de la Evaluación del Riesgo: Como siguiente paso, se debe buscar automatizar el análisis de riesgo relativo para cada cliente mediante técnicas avanzadas de análisis de datos, mejorando la precisión y rapidez en la evaluación de solicitudes de crédito. Continuar refinando el modelo de scoring crediticio para segmentar de manera más efectiva a los clientes según su perfil de riesgo.
+    * Optimización y automatización de la evaluación del riesgo: Como siguiente paso, se debe buscar automatizar el análisis de riesgo relativo para cada cliente mediante técnicas avanzadas de análisis de datos, mejorando la precisión y rapidez en la evaluación de solicitudes de crédito. Continuar refinando el modelo de scoring crediticio para segmentar de manera más efectiva a los clientes según su perfil de riesgo.
 
 ## 5. Enlaces de recursos adicionales:
 
 - [Dashboard Looker Studio](https://lookerstudio.google.com/reporting/a93c8d4e-10d9-4562-9806-51df8f09e581)
 - [PPT Google Slide](https://docs.google.com/presentation/d/1rNNuPIZ9SC9s3IFy0hyibhbkXulJIaae/edit?usp=sharing&rtpof=true&sd=true)
-- [Presentación Loom]()
+- [Presentación Loom](https://www.loom.com/share/9a8f2baaa4454f43a2c30f3e59d2c6b2?sid=2fe79c5e-5def-4c34-9e94-b58a8f56f528)   
+
+**Elaborado por:  
+Natalia Alejandro González  
+Agosto 2024**  
 
 
 
