@@ -84,6 +84,8 @@ Este conjunto de tablas contiene informción sobre préstamos concedidos a un gr
         2. Variables Independientes: Se comprobó que *debt_ratio* y *more_90_days_overdue* tenían una baja correlación, por lo que ambas se mantuvieron en el análisis, ya que proporcionaban información única.
         3. Decisión sobre variables: Solo se excluyó la variable *gender*, esto debido a que no es un factor determinante del riesgo crediticio, y su uso puede generar sesgos discriminatorios.
 
+##### Query de correlación y desviación estándar
+
 ``` sql
 SELECT  
  CORR(more_90_days_overdue,number_times_delayed_payment_loan_30_59_days) AS prueba_correlacion
@@ -95,7 +97,7 @@ SELECT
 FROM `riesgorelativop3.projectRR3.loans_detail` 
 -- 0.99213 alta correlación.
 
--- sacar la desviación estandar de cada variable para decidir: una desviación mayor = más representativa, por lo que se excluirá la variable con menor desviación.
+-- sacar la desviación estandar de cada variable para decidir: una desviación mayor = más representativa, por lo que se excluirá la variable con menor desviación.--
 
 SELECT
  STDDEV_SAMP(more_90_days_overdue)
@@ -112,7 +114,7 @@ SELECT
 FROM `riesgorelativop3.projectRR3.loans_detail` 
 -- 4.10551
 
--- La diferencia de la desviación estándar entre las variables es muy pequeña (0.03851) la dispersión de los datos alrededor de la media es muy similar para ambas variables.
+-- La diferencia de la desviación estándar entre las variables es muy pequeña (0.03851) la dispersión de los datos alrededor de la media es muy similar para ambas variables.--
 ```
 * 
     * Identificación y Tratamiento de Outliers: se utilizaron gráficos como histogramas y diagramas de caja (boxplots) en Looker Studio para identificar outliers en variables clave como *last_month_salary* y *age*.
@@ -131,35 +133,51 @@ WITH percentiles AS (
     PERCENTILE_CONT(last_month_salary, 0.02) OVER() AS S_P2,
     PERCENTILE_CONT(last_month_salary, 0.99) OVER() AS S_P99
   FROM
-    `riesgorelativop3.projectRR3.user_default_view`
+    `riesgorelativop3.projectRR3.user_info`
   WHERE
     last_month_salary IS NOT NULL
 ),
 winsorized_data AS (
   SELECT
-    t1.user_id,
+    CAST(a.user_id AS STRING) AS user_id,  
+    a.age,
     CASE
-      WHEN t1.last_month_salary < t2.S_P2 THEN t2.S_P2
-      WHEN t1.last_month_salary > t2.S_P99 THEN t2.S_P99
-      ELSE t1.last_month_salary
+      WHEN a.last_month_salary < p.S_P2 THEN p.S_P2
+      WHEN a.last_month_salary > p.S_P99 THEN p.S_P99
+      ELSE a.last_month_salar
     END AS lms_winsorized,
-    t1.age,
-    t1.number_dependents
+    a.number_dependents,
+    b.default_flag,
+    CASE 
+      WHEN a.age BETWEEN 21 AND 30 THEN '21-30'
+      WHEN a.age BETWEEN 31 AND 40 THEN '31-40'
+      WHEN a.age BETWEEN 41 AND 50 THEN '41-50'
+      WHEN a.age BETWEEN 51 AND 60 THEN '51-60'
+      WHEN a.age BETWEEN 61 AND 70 THEN '61-70'
+      WHEN a.age BETWEEN 71 AND 85 THEN '71-85'
+      ELSE 'Outside Range'
+    END AS age_range
   FROM
-    `riesgorelativop3.projectRR3.user_default_view` AS t1,
-    (SELECT DISTINCT S_P2, S_P99 FROM percentiles) AS t2
+    `riesgorelativop3.projectRR3.user_info` AS a
+  LEFT JOIN
+    `riesgorelativop3.projectRR3.default` AS b
+  ON
+    a.user_id = b.user_id,
+  (SELECT DISTINCT S_P2, S_P99 FROM percentiles) AS p
 )
+
 SELECT
-  user_id,
+  user_id, 
   CASE 
     WHEN age > 85 THEN 85 
     ELSE age 
-  END AS age_clean,
-  IFNULL(lms_winsorized, 5400) AS lms_clean,
-  IFNULL(number_dependents, 0) AS number_dependents_clean
+  END AS age_limited,
+  age_range,
+  IFNULL(lms_winsorized, 5400) AS last_month_salary_clean,
+  IFNULL(number_dependents, 0) AS number_dependents_clean,
+  default_flag
 FROM
   winsorized_data;
-
 ```
     
 - Creación de Nuevas Variables:  
