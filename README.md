@@ -118,16 +118,16 @@ FROM `riesgorelativop3.projectRR3.loans_detail`
 ```
 * 
     * Identificación y Tratamiento de Outliers: se utilizaron gráficos como histogramas y diagramas de caja (boxplots) en Looker Studio para identificar outliers en variables clave como *last_month_salary* y *age*.
-    * Seguido, se aplicó la técnica estadisticas de winsorización utilizando los percentiles P2 y P99 para reducir el impacto de los outliers sin eliminarlos.Se imputaron los valores extremos con los valores en estos percentiles, manteniendo así la representatividad de los datos cercanos a los extremos.    
+    * Seguido, se aplicó la técnica estadistica de winsorización, utilizando los percentiles P2 y P99 para reducir el impacto de los outliers sin eliminarlos.Se imputaron los valores extremos con los valores en estos percentiles, manteniendo así la representatividad de los datos cercanos a los extremos.    
         Pasos realizados:    
         1. Calcular percentiles P2 y P99 para *last_month_salary*.   
-        2. Limitar el rango de edad a un máximo de 85 años para categorizar mejor a los clientes mayores, se crea la varriable *age_limited*.  
+        2. Limitar el rango de edad a un máximo de 85 años para categorizar mejor a los clientes mayores, se crea la variable *age_limited*.  
         3. Imputar valores nulos en *last_month_salary* y *number_dependents* usando la mediana.
     * En la variable *using_lines_not_secured_personal_assets* de la tabla *loans_detail*, se identificaron valores en notación científica (ej. 7.25e-05). Estos valores son correctos y no se alteraron, ya que representan el uso bajo de líneas de crédito.
 
 ##### Query de winzorización
 
-``` slq
+``` sql
 WITH percentiles AS (
   SELECT
     PERCENTILE_CONT(last_month_salary, 0.02) OVER() AS S_P2,
@@ -144,7 +144,7 @@ winsorized_data AS (
     CASE
       WHEN a.last_month_salary < p.S_P2 THEN p.S_P2
       WHEN a.last_month_salary > p.S_P99 THEN p.S_P99
-      ELSE a.last_month_salar
+      ELSE a.last_month_salary
     END AS lms_winsorized,
     a.number_dependents,
     b.default_flag,
@@ -192,7 +192,28 @@ FROM
 
 #### 5. Análisis Exploratorio:   
 
+- Resumir datos categóricos:
+    * Se utilizaron tablas en Looker Studio para resumir y visualizar datos categóricos como *age_range* (rango de edad) y *cat_debt_ratio* (categorías de ratio de deuda). 
 
+![Texto alternativo](imagen/debtxedad.png?raw=true)
+
+- Visualización de datos categóricos:
+    * Se generaron gráficos de barras para representar variables categóricas, como las categorías de edad y el estado de impago (flag), permitiendo una comparación visual clara entre los grupos.
+
+- Cálculo de estadísticas descriptivas:
+    * Se emplearon tablas dinámicas para calcular estadísticas descriptivas que facilitaran la comprensión de la distribución de los datos. Esto incluyó medidas de tendencia central y dispersión para las variables categóricas.
+
+- Visualización de variables numéricas:
+    * Se utilizaron histogramas y diagramas de caja (boxplots) en Looker Studio para visualizar la distribución de variables numéricas como last_month_salary y debt_ratio.
+
+- Cálculo de cuartiles y percentiles:
+    * Utilizando la función `NTILE(4)`, se calcularon cuartiles para variables clave en el análisis de riesgo relativo, como *debt_ratio*, *total_loans*, *last_month_salary*, *more_90_days_overdue*.
+
+- Incorporación de nuevas categorías:
+    * Las categorías derivadas de los cuartiles fueron agregadas al dataset principal, permitiendo un análisis más detallado de los segmentos de clientes.
+
+- Cálculo de correlaciones:
+    * Se calcularon correlaciones entre variables utilizando la funcion `CORR`. Una correlación relevante identificada fue entre las variables *default_flag* y *more_90_days_overdue* (0.5754), lo que indica que a medida que el número de días en mora (más de 90 días) aumenta, también aumenta la probabilidad de que un cliente esté en default (es decir, que no haya pagado sus obligaciones financieras).
 
 
 
