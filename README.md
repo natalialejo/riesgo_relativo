@@ -205,7 +205,7 @@ FROM
 - Cálculo de estadísticas descriptivas:
     * Se emplearon tablas dinámicas para calcular estadísticas descriptivas que facilitaran la comprensión de la distribución de los datos. Esto incluyó medidas de tendencia central y dispersión para las variables categóricas.  
 
-<img src="images/ctm.png" alt="Texto alternativo" width="500"/>
+<img src="images/ctm.png" alt="Texto alternativo"/>
 
 - Visualización de variables numéricas:
     * Se utilizaron histogramas y diagramas de caja (boxplots) en Looker Studio para visualizar la distribución de variables numéricas como *last_month_salary* y *debt_ratio*.
@@ -322,7 +322,7 @@ El uso de KPIs en el dashboard fue fundamental para medir el rendimiento y evalu
 
 - Filtros interactivos: Se incluyeron opciones de filtrado que facilitaron la exploración de los datos, permitiendo a los usuarios personalizar la visualización y profundizar en áreas específicas del análisis.
 
-![Texto alternativo](images/dashboard.png.png?raw=true)
+![Texto alternativo](images/dashboard.png?raw=true)
 
 ## 4. Conclusiones y recomendaciones
 
