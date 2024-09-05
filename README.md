@@ -8,7 +8,8 @@
     3.2. [Análisis exploratorio](#Análisis-exploratorio)   
     3.3. [Análisis Riesgo Relativo](#Análisis-Riesgo-Relativo)    
     3.4. [Creación de Dashboard en Looker Studio](#Creación-de-Dashboard-en-Looker-Studio)    
-4. [Resultados y Recomendaciones](#Resultados-y-Recomendaciones)    
+4. [Resultados y Recomendaciones](#Resultados-y-Recomendaciones)
+5. [Enlaces de recursos adicionales](#Enlaces-de-recursos-adicionales)  
    
 ## 1. Objetivo:
  Identificar y segmentar a los clientes en función de su riesgo relativo, a través de la evaluación detallada de variables clave en la base de datos proporcionada por el banco. Este análisis inicial establecerá una base sólida para futuros desarrollos, como la creación de un score crediticio y la automatización del proceso de evaluación de riesgo, contribuyendo a la solidez financiera y operativa del banco.
