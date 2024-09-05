@@ -72,14 +72,14 @@ Este conjunto de tablas contiene informción sobre préstamos concedidos a un gr
 #### 4. Limpieza y transformación de datos:
 
 - Conexión e Importación de Datos:  
-    * Creación de proyecto *riesgorelativop3* y se conectaron las 4 tablas en Google BigQuery.
+    * Creación de proyecto *riesgorelativop3* y conexiónd de las 4 tablas en Google BigQuery.
 
 - Identificación de valores nulos, duplicados, fuera de rango o con caracteres extraños: 
     * Identificados y tratados 7,199 valores nulos en  variable *last_month_salary* y 943 en *number_dependents* en la tabla user_info.  
     * Datos duplicados no afectan significativamente el análisis.
-    * Se identificaron valores inconsistentes en la variable categórica *loan_type*(mayúsculas y minúsculas mezcladas) de la tabla loans_outstanding.Se corrigieron estos valores utilizando comandos `UPPER`, `LOWER` para estandarizar las categorías (real estate y other).
+    * Se identificaron valores inconsistentes en la variable categórica *loan_type*(mayúsculas y minúsculas mezcladas) de la tabla loans_outstanding.Se corrigieron estos valores utilizando `LOWER` y `CASE` para estandarizar las categorías (real estate y other).
     * Se cambiaron los formatos de *user_id* de `INTEGER` a `STRING` para evitar problemas en el proceso de unión de tablas.
-    * Se utilizó la función CORR para evaluar la correlación entre variables como:
+    * Se utilizó la función `CORR` para evaluar la correlación entre variables como:
         1. En *more_90_days_overdue* y *number_times_delayed_payment_loan_30_59_days*,se identificó una correlación alta (r = 0.9829), por lo que se comparó la desviación estándar de cada una y se eligió tomar en cuenta para el análisis la variable con mayor desviación estándar (*more_90_days_overdue*) para representar mejor la información.
         2. Variables Independientes: Se comprobó que *debt_ratio* y *more_90_days_overdue* tenían una baja correlación, por lo que ambas se mantuvieron en el análisis, ya que proporcionaban información única.
         3. Decisión sobre variables: Solo se excluyó la variable *gender*, esto debido a que no es un factor determinante del riesgo crediticio, y su uso puede generar sesgos discriminatorios.
@@ -89,6 +89,44 @@ Este conjunto de tablas contiene informción sobre préstamos concedidos a un gr
         1. Calcular percentiles P2 y P99 para *last_month_salary*.   
         2. Limitar el rango de edad a un máximo de 85 años para categorizar mejor a los clientes mayores, se crea la varriable *age_limited*.  
         3. Imputar valores nulos en *last_month_salary* y *number_dependents* usando la mediana.
+
+``` slq
+WITH percentiles AS (
+  SELECT
+    PERCENTILE_CONT(last_month_salary, 0.02) OVER() AS S_P2,
+    PERCENTILE_CONT(last_month_salary, 0.99) OVER() AS S_P99
+  FROM
+    `riesgorelativop3.projectRR3.user_default_view`
+  WHERE
+    last_month_salary IS NOT NULL
+),
+winsorized_data AS (
+  SELECT
+    t1.user_id,
+    CASE
+      WHEN t1.last_month_salary < t2.S_P2 THEN t2.S_P2
+      WHEN t1.last_month_salary > t2.S_P99 THEN t2.S_P99
+      ELSE t1.last_month_salary
+    END AS lms_winsorized,
+    t1.age,
+    t1.number_dependents
+  FROM
+    `riesgorelativop3.projectRR3.user_default_view` AS t1,
+    (SELECT DISTINCT S_P2, S_P99 FROM percentiles) AS t2
+)
+SELECT
+  user_id,
+  CASE 
+    WHEN age > 85 THEN 85 
+    ELSE age 
+  END AS age_clean,
+  IFNULL(lms_winsorized, 5400) AS lms_clean,
+  IFNULL(number_dependents, 0) AS number_dependents_clean
+FROM
+  winsorized_data;
+
+```
+       
     * En la variable *using_lines_not_secured_personal_assets* de la tabla *loans_detail*, se identificaron valores en notación científica (ej. 7.25e-05). Estos valores son correctos y no se alteraron, ya que representan el uso bajo de líneas de crédito.
 
 - Creación de Nuevas Variables:  
